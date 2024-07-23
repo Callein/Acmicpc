@@ -1,5 +1,5 @@
-from itertools import permutations
-from collections import defaultdict
+# from itertools import permutations
+# from collections import defaultdict
 import sys
 
 
@@ -9,15 +9,15 @@ def calculate_cost(word, perm):
 
 def solve(sentence, words):
     n = len(sentence)
-    word_perm = defaultdict(list)
+    # word_perm = defaultdict(list)
 
-    # 각 단어의 모든 순열과 그 순열의 비용을 계산
-    for word in words:
-        perms = set(permutations(word))
-        for perm in perms:
-            perm_str = ''.join(perm)
-            cost = calculate_cost(word, perm_str)
-            word_perm[word].append((perm_str, cost))
+    # # 각 단어의 모든 순열과 그 순열의 비용을 계산
+    # for word in words:
+    #     perms = set(permutations(word))
+    #     for perm in perms:
+    #         perm_str = ''.join(perm)
+    #         cost = calculate_cost(word, perm_str)
+    #         word_perm[word].append((perm_str, cost))
 
     dp = [float('inf')] * (n + 1)
     dp[0] = 0
@@ -31,9 +31,10 @@ def solve(sentence, words):
             len_word = len(word)
             if i + len_word <= n:
                 substr = sentence[i:i + len_word]
-                for perm, cost in word_perm[word]:
-                    if perm == substr:
-                        dp[i + len_word] = min(dp[i + len_word], dp[i] + cost)
+                if sorted(substr) == sorted(word):
+                    cost = calculate_cost(word, substr)
+                    dp[i + len_word] = min(dp[i + len_word], dp[i] + cost)
+
     return dp[n] if dp[n] != float('inf') else -1
 
 
