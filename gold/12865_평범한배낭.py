@@ -15,6 +15,16 @@ Fractional 이 아니기 때문에 Greedy 가 아닌 Brute Force, DP, Branch and
     • weight > W 일 때는 해당 node 에서 계산된 benefit 이 무효하다. max_benefit 이 update 되서는 안된다.
 • Promising 인 node 가 없을 때 까지 BFS 검색 시행.
 
+<B&B 반례>
+4 6
+6 13
+3 8
+7 15
+2 6
+
+출력  : 13
+기대값 : 14 ( 8+6 ) 
+
 """
 
 
@@ -23,9 +33,6 @@ class Item:
         self.weight = weight
         self.benefit = benefit
         self.benefit_per_weight = benefit / weight
-
-    def __lt__(self, other):
-        return self.benefit_per_weight > other.benefit_per_weight
 
 
 class Node:
@@ -59,8 +66,9 @@ N, K = map(int, sys.stdin.readline().split())
 items = []
 for _ in range(N):
     w, v = map(int, sys.stdin.readline().split())
-    item = Item(w, v)
-    heapq.heappush(items, item)
+    items.append(Item(w, v))
+items = sorted(items, key=lambda item: item.benefit_per_weight)
+
 
 promising = []
 max_benefit = 0
@@ -78,31 +86,44 @@ while len(promising) > 0:
     curr_weight = curr_node.curr_weight
     curr_index = curr_node.index + 1
     max_benefit = max(max_benefit, curr_node.curr_benefit)
+    print("c_b c_w m_b c_i")
+    print(curr_benefit, curr_weight, max_benefit, curr_index)
     if curr_index < len(items):
         # 넣을때
         node1 = Node(curr_index, curr_benefit + items[curr_index].benefit, curr_weight + items[curr_index].weight, K, items)
-        if node1.bound > max_benefit and node1.curr_weight < K:
+        print(node1.curr_benefit, node1.curr_weight, round(node1.bound,1), node1.index)
+        if node1.bound >= max_benefit and node1.curr_weight < K:
             heapq.heappush(promising, node1)
+            print("프로미싱")
         elif node1.curr_weight <= K:
+            print("맥스 갱신")
             max_benefit = max(max_benefit, node1.curr_benefit)
         # 안넣을 때
         node2 = Node(curr_index, curr_benefit, curr_weight, K, items)
-        if node2.bound > max_benefit and node2.curr_weight < K:
+        print(node2.curr_benefit, node2.curr_weight, round(node2.bound,1), node2.index)
+        if node2.bound >= max_benefit and node2.curr_weight < K:
             heapq.heappush(promising, node2)
+            print("프로미싱")
         elif node2.curr_weight <= K:
+            print("맥스 갱신")
             max_benefit = max(max_benefit, node2.curr_benefit)
-
+    print()
 print(max_benefit)
 
+for i in items:
+    print(i.weight, i.benefit, i.benefit_per_weight)
+
+
 # [DP]
-# n, k = map(int, input().split())
-#
-# dp = [[0] * (k + 1) for _ in range(n + 1)]
-# for i in range(1, n + 1):
-#     weight, value = map(int, input().split())
-#     for j in range(1, k + 1):
-#         if j < weight:
-#             dp[i][j] = dp[i - 1][j]
-#         else:
-#             dp[i][j] = max(dp[i - 1][j], dp[i - 1][j - weight] + value)
-# print(dp[n][k])
+def knapsack_dp():
+    n, k = map(int, input().split())
+
+    dp = [[0] * (k + 1) for _ in range(n + 1)]
+    for i in range(1, n + 1):
+        weight, value = map(int, input().split())
+        for j in range(1, k + 1):
+            if j < weight:
+                dp[i][j] = dp[i - 1][j]
+            else:
+                dp[i][j] = max(dp[i - 1][j], dp[i - 1][j - weight] + value)
+    print(dp[n][k])
